@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit category</title>
+    <style>
+        .colorText {
+        color: red;
+        }
+    </style>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <td th:text="${category.id} + ${category.name}"></td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            <div>
+                <label>Name: </label>
+                <input type="text" name="name" form="edit">
+            </div>
+            <div>
+                <label>Request Id: </label>
+                <input type="text" name="requestId" form="edit">
+            </div>
+            <div th:if="${message}">
+                <p th:text="${message}" class="colorText"></p>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div>
+                <form th:action="@{/editCategory/{category_id}(category_id=${category.id})}"
+                      method="post" id="edit">
+                    <button type="submit">Save changes</button>
+                </form>
+                <form th:action="@{/deleteCategory/{category_id}(category_id=${category.id})}"
+                      th:method="post">
+                    <button type="submit">Delete</button>
+                </form>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

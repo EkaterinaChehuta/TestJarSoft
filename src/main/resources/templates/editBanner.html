@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit banner</title>
+    <style>
+        .colorText {
+        color: red;
+        }
+    </style>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <td th:text="${banner.id} + ${banner.name}"></td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            <div>
+                <label>Name: </label>
+                <input type="text" name="name" form="edit">
+            </div>
+            <div>
+                <label>Price: </label>
+                <input type="number" step="0.01" name="price" form="edit">
+            </div>
+            <div>
+                <label>Category: </label>
+                <select name="categoryId" form="edit">
+                    <option value="0" selected disabled>--</option>
+                    <option th:each="category: ${categories}"
+                            th:value="${category.id}"
+                            th:text="${category.name}"></option>
+                </select>
+            </div>
+            <div>
+                <label>Text: </label>
+                <textarea rows="10" cols="45" name="text" form="edit"></textarea>
+            </div>
+            <div th:if="${message}">
+                <p th:text="${message}" class="colorText"></p>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div>
+                <form th:action="@{/editBanner/{banner_id}(banner_id=${banner.id})}"
+                      method="post" id="edit">
+                    <button type="submit">Save changes</button>
+                </form>
+                <form th:action="@{/deleteBanner/{banner_id}(banner_id=${banner.id})}"
+                      method="post">
+                    <button type="submit">Delete</button>
+                </form>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
