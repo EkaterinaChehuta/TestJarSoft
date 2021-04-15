@@ -10,4 +10,6 @@ import java.util.List;
 public interface CategoryRepos extends JpaRepository<Category, Integer> {
     List<Category> findByIsDeleted(boolean isDeleted);
     List<Category> findByNameOrRequestId(String name, String requestId);
+    List<Category> findByNameContainingAndIsDeleted(String string, boolean isDeleted);
+    Category findByRequestIdAndIsDeleted(String category, boolean isDeleted);
 }

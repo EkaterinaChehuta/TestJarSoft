@@ -15,6 +15,8 @@ public class Request {
     @JoinColumn(name = "banner_id")
     private Banner banner;
 
+    private String userAgent;
+
     private String ip;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
@@ -23,8 +25,9 @@ public class Request {
     public Request() {
     }
 
-    public Request(Banner banner, String ip, LocalDateTime date) {
+    public Request(Banner banner, String userAgent, String ip, LocalDateTime date) {
         this.banner = banner;
+        this.userAgent = userAgent;
         this.ip = ip;
         this.date = date;
     }
@@ -39,6 +42,14 @@ public class Request {
 
     public void setBanner(Banner banner) {
         this.banner = banner;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
     public String getIp() {

@@ -1,0 +1,11 @@
+com\exemple\jarsoft\domain\Request.class
+com\exemple\jarsoft\repos\BannerRepos.class
+com\exemple\jarsoft\ServingWebContentApplication.class
+com\exemple\jarsoft\repos\RequestRepos.class
+com\exemple\jarsoft\repos\CategoryRepos.class
+com\exemple\jarsoft\controller\BannerController.class
+com\exemple\jarsoft\domain\Banner.class
+com\exemple\jarsoft\domain\Category.class
+com\exemple\jarsoft\controller\CategoryController.class
+com\exemple\jarsoft\controller\RequestController.class
+com\exemple\jarsoft\config\WebSecurityConfig.class

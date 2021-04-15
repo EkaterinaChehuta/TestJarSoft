@@ -8,19 +8,25 @@
         .colorText {
         color: red;
         }
+
     </style>
 </head>
 <body>
-<form method="post" th:action="@{/createBanner}" th:object="${banner}">
-    <div><input required type="text" th:field="*{name}" placeholder="Some banner..."></div>
-    <div><input required type="number" step="0.01" th:field="*{price}"></div>
-    <div><select required th:field="*{category}" name="categoryId">
+<form method="post" th:action="@{/createBanner}" th:object="${banner}" id="save">
+<div>
+    <input required type="text" name="name" th:field="*{name}" placeholder="Name" form="save">
+    <input required type="number" step="0.01" name="price" th:field="*{price}" form="save">
+    <select required name="categoryId" th:field="*{category}" form="save">
         <option value="0" selected disabled>--</option>
         <option th:each="category: ${categories}"
                 th:value="${category.id}"
                 th:text="${category.name}"></option>
-    </select></div>
-    <div><textarea required rows="10" cols="45" name="text" th:field="*{text}" placeholder="Text"></textarea></div>
+    </select>
+</div>
+<div>
+    <textarea required rows="10" cols="45" name="text" th:field="*{text}" placeholder="Text" form="save"></textarea>
+</div>
+
     <button type="submit">Save</button>
 </form>
 <div th:if="${message}">

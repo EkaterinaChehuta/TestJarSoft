@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <title>Create Category</title>
@@ -12,9 +11,9 @@
     </style>
 </head>
 <body>
-<form method="post" th:action="@{/createCategory}">
-    <input required type="text" name="name" placeholder="Name">
-    <input required type="text" name="requestId" placeholder="Request Id">
+<form method="post" th:action="@{/createCategory}" th:object="${category}" id="save">
+<input required type="text" name="name" th:field="*{name}" placeholder="Name" form="save">
+<input required type="text" name="requestId" th:field="*{requestId}" placeholder="Request Id" form="save">
     <button type="submit">Save</button>
 </form>
 <div th:if="${message}">

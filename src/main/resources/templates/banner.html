@@ -3,22 +3,17 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Banner</title>
+    <title>Category</title>
     <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
-    <style>
-        .colorText {
-        color: red;
-        }
-
-    </style>
 </head>
 <body>
 <table width="100%" border="1" cellspacing="0">
     <thead>
     <tr>
-        <td colspan="2">
+        <td>
             <div>
                 <p><a th:href="@{/category}">Category</a></p>
                 <p><a th:href="@{/banner}">Banner</a></p>
@@ -28,15 +23,45 @@
     </thead>
     <tbody>
     <tr>
-        <td rowspan="2">
-            <div id="listBanners"></div>
-        </td>
         <td>
-            <div id="idBanner"></div>
+            <div>
+                <div>
+                    <label>List of banner</label>
+                    <input type="text" name="filter" form="filter">
+                    <form th:action="@{/banner/filter}" method="get" id="filter">
+                        <button type="submit">Search</button>
+                    </form>
+                    <form th:action="@{/banner}" method="get">
+                        <button type="submit">All banners</button>
+                    </form>
+                </div>
+                <table width="100%" border="1" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="banner: ${banners}">
+                        <td th:text="${banner.id}"></td>
+                        <td th:text="${banner.name}"></td>
+                        <td th:text="${banner.category.name}"></td>
+                        <td>
+                            <div>
+                                <form th:action="@{/editBanner/{banner_id}(banner_id = ${banner.id})}"
+                                      th:method="get">
+                                    <button type="submit">Edit</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </td>
-    </tr>
-    <tr>
-        <td id="edit"></td>
     </tr>
     <tr>
         <td>
@@ -44,113 +69,8 @@
                 <button type="submit">Create new banner</button>
             </form>
         </td>
-        <td>
-            <div id="action"></div>
-        </td>
     </tr>
     </tbody>
 </table>
-<script type="text/babel" th:inline="javascript">
-const Router = ReactRouterDOM.BrowserRouter;
-const Route = ReactRouterDOM.Route;
-const Switch = ReactRouterDOM.Switch;
-const NavLink = ReactRouterDOM.NavLink;
-const Redirect = ReactRouterDOM.Redirect;
-
-const banners = [[${banners}]];
-
-class List extends React.Component {
-handleClick = () => {
-        document.getElementById("idBanner").innerHTML = this.props.name + " ID: " + this.props.id;
-
-        ReactDOM.render(
-            <FormEdit key={this.props.id} name={this.props.name} id={this.props.id} />,
-            document.getElementById("edit")
-        );
-    }
-
-    render() {
-        return (
-            <nav>
-                <NavLink to="/banner" onClick={this.handleClick.bind(this)}>{this.props.name}</NavLink>
-            </nav>);
-    }
-}
-
-class FilteredList extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {banners: banners};
-
-        this.filterList = this.filterList.bind(this);
-    }
-
-    filterList(e) {
-        var filteredList = this.props.banners.filter(function(banner) {
-            return banner.name.toLowerCase().search(e.target.value.toLowerCase())!= -1;
-        });
-
-        this.setState({banners: filteredList});
-    }
-
-    render() {
-        return (
-            <div>
-                <h2>List of banners</h2>
-                <input placeholder="Search" onChange={this.filterList} />
-                <div>
-                    {
-                        this.state.banners.map(function(banner) {
-                            return (
-                                <List key={banner.id} name={banner.name} id={banner.id}/>
-                            );
-                        })
-                    }
-                </div>
-            </div>
-        );
-    }
-}
-
-
-class FormEdit extends React.Component {
-render() {
-    return (
-        <div>
-            <label>Name: {this.props.name}</label>
-            <form th:action="@{/editBanner/1}" method="get">
-                <button type="submit">Edit</button>
-            </form>
-        </div>
-    );}
-}
-
-class Banners extends React.Component{
-    render() {
-        return <FilteredList banners={banners} />;
-    }
-}
-
-class BannersList extends React.Component {
-    render() {
-        return <div>
-                    <Switch>
-                        <Route path="/banner" component={Banners} />
-                    </Switch>
-               </div>;
-    }
-}
-
-ReactDOM.render(
-    <Router>
-        <div>
-            <Switch>
-                <Route path="/banner" component={BannersList} />
-            </Switch>
-        </div>
-    </Router>,
-    document.getElementById("listBanners")
-);
-</script>
 </body>
 </html>

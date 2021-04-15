@@ -14,7 +14,7 @@
 <table>
     <thead>
     <tr>
-        <td th:text="${category.id} + ${category.name}"></td>
+        <td th:text="${category.id} + ' ' + ${category.name}"></td>
     </tr>
     </thead>
     <tbody>
@@ -30,13 +30,16 @@
             </div>
             <div th:if="${message}">
                 <p th:text="${message}" class="colorText"></p>
+                <ul th:each="banner: ${bannersList}">
+                    <li th:text="${banner.name}"></li>
+                </ul>
             </div>
         </td>
     </tr>
     <tr>
         <td>
             <div>
-                <form th:action="@{/editCategory/{category_id}(category_id=${category.id})}"
+                <form th:action="@{/editCategory/{category_id}/save(category_id=${category.id})}"
                       method="post" id="edit">
                     <button type="submit">Save changes</button>
                 </form>

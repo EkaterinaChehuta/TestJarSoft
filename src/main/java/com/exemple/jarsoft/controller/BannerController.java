@@ -1,11 +1,11 @@
 package com.exemple.jarsoft.controller;
 
 import com.exemple.jarsoft.domain.Banner;
-import com.exemple.jarsoft.domain.Category;
 import com.exemple.jarsoft.domain.Request;
 import com.exemple.jarsoft.repos.BannerRepos;
 import com.exemple.jarsoft.repos.CategoryRepos;
 import com.exemple.jarsoft.repos.RequestRepos;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,21 +13,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 public class BannerController {
     private final BannerRepos bannerRepos;
     private final CategoryRepos categoryRepos;
-    private final RequestRepos requestRepos;
 
-
-    public BannerController(BannerRepos bannerRepos, CategoryRepos categoryRepos, RequestRepos requestRepos) {
+    @Autowired
+    public BannerController(BannerRepos bannerRepos, CategoryRepos categoryRepos) {
         this.bannerRepos = bannerRepos;
         this.categoryRepos = categoryRepos;
-        this.requestRepos = requestRepos;
     }
 
     @GetMapping("/banner")
@@ -36,34 +33,41 @@ public class BannerController {
         return "banner";
     }
 
+    @GetMapping("/banner/filter")
+    public String getFilterBanner(@RequestParam(required = false) String filter, Model model) {
+        List<Banner> filteredBanners = bannerRepos.findByNameContainingAndIsDeleted(filter, false);
+
+        model.addAttribute("banners", filteredBanners);
+        return "banner";
+    }
+
     @GetMapping("/createBanner")
     public String newBanner(Model model) {
         model.addAttribute("banner", new Banner());
-        model.addAttribute("categories", categoryRepos.findAll());
+        model.addAttribute("categories", categoryRepos.findByIsDeleted(false));
         return "createBanner";
     }
 
     @PostMapping("/createBanner")
-    public String createBanner(Banner banner, Model model) throws UnknownHostException {
+    public String createBanner(Banner banner, Model model) {
         Banner foundBanner = bannerRepos.findByNameAndCategory(banner.getName(), banner.getCategory());
 
         if (foundBanner == null) {
             banner.setDeleted(false);
             bannerRepos.save(banner);
 
-            requests(banner);
-
             return "redirect:/banner";
         }
 
-        model.addAttribute("categories", categoryRepos.findAll());
-        model.addAttribute("message", "Банер с таким именем в категории существует!");
+        model.addAttribute("categories", categoryRepos.findByIsDeleted(false));
+        model.addAttribute("message", "Банер с именем " + banner.getName() + " в категории " +
+                banner.getCategory().getName() + " существует!");
         return "createBanner";
     }
 
-    @GetMapping("/editBanner")
-    public String getEditBanner(@RequestParam Integer id, Model model) {
-        model.addAttribute("categories", categoryRepos.findAll());
+    @GetMapping("/editBanner/{banner_id}")
+    public String getEditBanner(@PathVariable("banner_id") Integer id, Model model) {
+        model.addAttribute("categories", categoryRepos.findByIsDeleted(false));
         model.addAttribute("banner", bannerRepos.getOne(id));
         return "editBanner";
     }
@@ -74,18 +78,42 @@ public class BannerController {
                              @RequestParam(required = false) Double price,
                              @RequestParam(required = false) Integer categoryId,
                              @RequestParam(required = false) String text, Model model) throws UnknownHostException {
-        Banner banner = bannerRepos.findByNameAndCategory(name, categoryRepos.getOne(categoryId));
-
-        if (banner != null) {
-            model.addAttribute("message", "Баннер с именем " + name + " в категории " +
-                    categoryRepos.getOne(categoryId).getName() + " существует!");
-            return "banner/{banner_id}";
-        }
-
         Banner thisBanner = bannerRepos.getOne(id);
 
         if (name != null && !name.isEmpty()) {
-            thisBanner.setName(name);
+            Banner banner = bannerRepos.findByNameAndCategory(name, thisBanner.getCategory());
+
+            if (banner == null) {
+                if (categoryId != null) {
+                    banner = bannerRepos.findByNameAndCategory(name, categoryRepos.getOne(categoryId));
+
+                    if (banner == null) {
+                        thisBanner.setCategory(categoryRepos.getOne(categoryId));
+                    } else {
+                        model.addAttribute("message", "Баннер с именем " + name + " в категории " +
+                                categoryRepos.getOne(categoryId).getName() + " существует!");
+                        return getEditBanner(id, model);
+                    }
+                }
+
+                thisBanner.setName(name);
+            } else {
+                model.addAttribute("message", "Баннер с именем " + name + " в категории " +
+                        thisBanner.getCategory().getName() + " существует!");
+                return getEditBanner(id, model);
+            }
+        } else {
+            if (categoryId != null) {
+                Banner banner = bannerRepos.findByNameAndCategory(thisBanner.getName(), categoryRepos.getOne(categoryId));
+
+                if (banner == null) {
+                    thisBanner.setCategory(categoryRepos.getOne(categoryId));
+                } else {
+                    model.addAttribute("message", "Баннер с именем " + thisBanner.getName() + " в категории " +
+                            categoryRepos.getOne(categoryId).getName() + " существует!");
+                    return getEditBanner(id, model);
+                }
+            }
         }
 
         if (price != null) {
@@ -100,28 +128,18 @@ public class BannerController {
             thisBanner.setText(text);
         }
 
-        requests(thisBanner);
+        bannerRepos.save(thisBanner);
 
         return "redirect:/banner";
     }
 
 
     @PostMapping("/deleteBanner/{banner_id}")
-    public String deleteBanner(@PathVariable("banner_id") Integer id) throws UnknownHostException {
+    public String deleteBanner(@PathVariable("banner_id") Integer id) {
         Banner banner = bannerRepos.getOne(id);
         banner.setDeleted(true);
         bannerRepos.save(banner);
 
-        requests(banner);
-
         return "redirect:/banner";
-    }
-
-    private void requests(Banner banner) throws UnknownHostException {
-        String ip = InetAddress.getLocalHost().toString();
-        LocalDateTime ldt = LocalDateTime.now();
-
-        Request request = new Request(banner, ip, ldt);
-        requestRepos.save(request);
     }
 }

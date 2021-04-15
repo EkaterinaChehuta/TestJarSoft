@@ -2,8 +2,10 @@ package com.exemple.jarsoft.controller;
 
 import com.exemple.jarsoft.domain.Banner;
 import com.exemple.jarsoft.domain.Category;
+import com.exemple.jarsoft.domain.Request;
 import com.exemple.jarsoft.repos.BannerRepos;
 import com.exemple.jarsoft.repos.CategoryRepos;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -18,6 +24,7 @@ public class CategoryController {
     private final CategoryRepos categoryRepos;
     private final BannerRepos bannerRepos;
 
+    @Autowired
     public CategoryController(CategoryRepos categoryRepos, BannerRepos bannerRepos) {
         this.categoryRepos = categoryRepos;
         this.bannerRepos = bannerRepos;
@@ -26,6 +33,14 @@ public class CategoryController {
     @GetMapping("/category")
     public String getCategory(Model model) {
         model.addAttribute("categories", categoryRepos.findByIsDeleted(false));
+        return "category";
+    }
+
+    @GetMapping("/category/filter")
+    public String getFilterCategory(@RequestParam(required = false) String filter, Model model) {
+        List<Category> filteredCategories = categoryRepos.findByNameContainingAndIsDeleted(filter, false);
+
+        model.addAttribute("categories", filteredCategories);
         return "category";
     }
 
@@ -55,7 +70,7 @@ public class CategoryController {
         return "editCategory";
     }
 
-    @PostMapping("/editCategory/{category_id}")
+    @PostMapping("/editCategory/{category_id}/save")
     public String editCategory(@PathVariable("category_id") Integer id,
                                @RequestParam(required = false) String name,
                                @RequestParam(required = false) String requestId, Model model) {
@@ -63,7 +78,7 @@ public class CategoryController {
 
         if (foundCategory.size() != 0) {
             model.addAttribute("message", "Категория с таким именем существует!");
-            return "editCategory/{category_id}";
+            return getEditCategory(id, model);
         }
 
         Category thisCategory = categoryRepos.getOne(id);
@@ -86,7 +101,7 @@ public class CategoryController {
         Category category = categoryRepos.getOne(id);
         List<Banner> bannerList = bannerRepos.findByCategoryAndIsDeleted(category, false);
 
-        if(bannerList.size() == 0){
+        if (bannerList.size() == 0) {
             category.setDeleted(true);
             categoryRepos.save(category);
             return "redirect:/category";
@@ -94,6 +109,6 @@ public class CategoryController {
 
         model.addAttribute("message", "Категория не может быть удалена, так как имеет не удаленные баннеры!");
         model.addAttribute("bannersList", bannerList);
-        return "editCategory/{category_id}";
+        return getEditCategory(id, model);
     }
 }

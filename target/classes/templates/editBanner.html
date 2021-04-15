@@ -14,7 +14,7 @@
 <table>
     <thead>
     <tr>
-        <td th:text="${banner.id} + ${banner.name}"></td>
+        <th th:text="'ID: ' + ${banner.id} + ' Name: ' + ${banner.name} + ' Category: ' + ${banner.category.name}"></th>
     </tr>
     </thead>
     <tbody>
@@ -54,7 +54,7 @@
                     <button type="submit">Save changes</button>
                 </form>
                 <form th:action="@{/deleteBanner/{banner_id}(banner_id=${banner.id})}"
-                      method="post">
+                      th:method="post">
                     <button type="submit">Delete</button>
                 </form>
             </div>

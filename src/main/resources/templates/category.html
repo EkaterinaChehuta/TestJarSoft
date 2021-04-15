@@ -13,7 +13,7 @@
 <table width="100%" border="1" cellspacing="0">
     <thead>
     <tr>
-        <td colspan="2">
+        <td>
             <div>
                 <p><a th:href="@{/category}">Category</a></p>
                 <p><a th:href="@{/banner}">Banner</a></p>
@@ -23,15 +23,43 @@
     </thead>
     <tbody>
     <tr>
-        <td rowspan="2">
-            <div id="listCategories"></div>
-        </td>
         <td>
-            <div id="idCategory"></div>
+            <div>
+                <div>
+                    <label>List of category</label>
+                    <input type="text" name="filter" form="filter">
+                    <form th:action="@{/category/filter}" method="get" id="filter">
+                        <button type="submit">Search</button>
+                    </form>
+                    <form th:action="@{/category}" method="get">
+                        <button type="submit">All categories</button>
+                    </form>
+                </div>
+                <table width="100%" border="1" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="category: ${categories}">
+                        <td th:text="${category.id}"></td>
+                        <td th:text="${category.name}"></td>
+                        <td>
+                            <div>
+                                <form th:action="@{/editCategory/{category_id}(category_id = ${category.id})}"
+                                      th:method="get">
+                                    <button type="submit">Edit</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </td>
-    </tr>
-    <tr>
-        <td id="edit"></td>
     </tr>
     <tr>
         <td>
@@ -39,113 +67,8 @@
                 <button type="submit">Create new category</button>
             </form>
         </td>
-        <td>
-            <div id="action"></div>
-        </td>
     </tr>
     </tbody>
 </table>
-<script type="text/babel" th:inline="javascript">
-const Router = ReactRouterDOM.BrowserRouter;
-const Route = ReactRouterDOM.Route;
-const Switch = ReactRouterDOM.Switch;
-const NavLink = ReactRouterDOM.NavLink;
-const Redirect = ReactRouterDOM.Redirect;
-
-const categories = [[${categories}]];
-
-class List extends React.Component {
-handleClick = () => {
-        document.getElementById("idCategory").innerHTML = this.props.name + " ID: " + this.props.id;
-
-        ReactDOM.render(
-            <FormEdit key={this.props.id} name={this.props.name} id={this.props.id} />,
-            document.getElementById("edit")
-        );
-    }
-
-    render() {
-        return (
-            <nav>
-                <NavLink to="/category" onClick={this.handleClick.bind(this)}>{this.props.name}</NavLink>
-            </nav>);
-    }
-}
-
-class FilteredList extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {categories: categories};
-
-        this.filterList = this.filterList.bind(this);
-    }
-
-    filterList(e) {
-        var filteredList = this.props.categories.filter(function(category) {
-            return category.name.toLowerCase().search(e.target.value.toLowerCase())!= -1;
-        });
-
-        this.setState({categories: filteredList});
-    }
-
-    render() {
-        return (
-            <div>
-                <h2>List of categories</h2>
-                <input placeholder="Search" onChange={this.filterList} />
-                <div>
-                    {
-                        this.state.categories.map(function(category) {
-                            return (
-                                <List key={category.id} name={category.name} id={category.id}/>
-                            );
-                        })
-                    }
-                </div>
-            </div>
-        );
-    }
-}
-
-
-class FormEdit extends React.Component {
-render() {
-    return (
-        <div>
-            <label>Name: {this.props.name}</label>
-            <form th:action="@{/editCategory/1}" method="get">
-                <button type="submit">Edit</button>
-            </form>
-        </div>
-    );}
-}
-
-class Categories extends React.Component{
-    render() {
-        return <FilteredList categories={categories} />;
-    }
-}
-
-class CategoriesList extends React.Component {
-    render() {
-        return <div>
-                    <Switch>
-                        <Route path="/category" component={Categories} />
-                    </Switch>
-               </div>;
-    }
-}
-
-ReactDOM.render(
-    <Router>
-        <div>
-            <Switch>
-                <Route path="/category" component={CategoriesList} />
-            </Switch>
-        </div>
-    </Router>,
-    document.getElementById("listCategories")
-);
-</script>
 </body>
 </html>
